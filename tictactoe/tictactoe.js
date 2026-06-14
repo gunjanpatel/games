@@ -345,3 +345,16 @@ document.getElementById('startBtn').addEventListener('click', () => {
     }));
   } catch { }
 }, true); // capture phase so it runs before startGame
+
+// Prevent single-finger scroll on touch, allow two-finger
+document.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 1) e.preventDefault();
+}, { passive: false });
+
+// Disable double-tap zoom
+let lastTap = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTap < 300) e.preventDefault();
+  lastTap = now;
+}, { passive: false });
