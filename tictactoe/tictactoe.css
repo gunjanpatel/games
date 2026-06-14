@@ -1,3 +1,21 @@
+@property --brand {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #22d3ee;
+}
+
+@property --brand-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #67e8f9;
+}
+
+@property --brand-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(34, 211, 238, 0.15);
+}
+
 :root {
   --bg: #000000;
   --bg-subtle: #1c1c1e;
@@ -6,13 +24,24 @@
   --text-2: rgba(235, 235, 245, 0.75);
   --text-3: rgba(235, 235, 245, 0.50);
   --text-4: rgba(235, 235, 245, 0.25);
-  --brand: #a78bfa;
-  --brand-hover: #c4b5fd;
-  --brand-soft: rgba(167, 139, 250, 0.15);
+  --brand: #22d3ee;
+  --brand-hover: #67e8f9;
+  --brand-soft: rgba(34, 211, 238, 0.15);
   --glass-bg: rgba(28, 28, 30, 0.72);
   --glass-border: rgba(255, 255, 255, 0.10);
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
 }
+
+body, header, .nav-link, .tag, .game-card {
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, --brand 0.4s ease, --brand-hover 0.4s ease, --brand-soft 0.4s ease;
+}
+
+body.theme-ttt {
+  --brand: #22d3ee;
+  --brand-hover: #67e8f9;
+  --brand-soft: rgba(34, 211, 238, 0.15);
+}
+
 
 html {
   font-family: 'Inter', system-ui, sans-serif;

@@ -12,6 +12,7 @@ const COLORS = [
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let mode = '2p'; // '2p' | 'cpu'
+let cpuPersona = 'chaos'; // 'trapper' | 'wall' | 'chaos'
 let players = [
   { name: 'Player 1', colorIdx: 0 }, // Red default
   { name: 'Player 2', colorIdx: 1 }, // Blue default
@@ -21,6 +22,76 @@ let current = 0; // whose turn: 0 or 1
 let gameOver = false;
 let scores = [0, 0, 0]; // [p1 wins, p2 wins, draws]
 let cpuThinking = false;
+
+// ─── Persona Strategy Registry ────────────────────────────────────────────────
+const PERSONAS = {
+  trapper: {
+    name: "The Trapper",
+    move: (empty) => {
+      // 1. Win if possible
+      for (const i of empty) {
+        board[i] = 1;
+        if (checkResult()?.winner === 1) { board[i] = null; return i; }
+        board[i] = null;
+      }
+      // 2. Block if player is winning
+      for (const i of empty) {
+        board[i] = 0;
+        if (checkResult()?.winner === 0) { board[i] = null; return i; }
+        board[i] = null;
+      }
+      // 3. Corners priority (The Trapper aggressively targets corners to form setups)
+      const corners = [0, 2, 6, 8].filter(c => empty.includes(c));
+      if (corners.length > 0) {
+        return corners[Math.floor(Math.random() * corners.length)];
+      }
+      // 4. Center
+      if (empty.includes(4)) return 4;
+      // 5. Fallback
+      return empty[Math.floor(Math.random() * empty.length)];
+    }
+  },
+  wall: {
+    name: "The Wall",
+    move: (empty) => {
+      // 1. Win if possible
+      for (const i of empty) {
+        board[i] = 1;
+        if (checkResult()?.winner === 1) { board[i] = null; return i; }
+        board[i] = null;
+      }
+      // 2. Block if player is winning
+      for (const i of empty) {
+        board[i] = 0;
+        if (checkResult()?.winner === 0) { board[i] = null; return i; }
+        board[i] = null;
+      }
+      // 3. Center priority (The Wall locks down center grid early)
+      if (empty.includes(4)) return 4;
+      // 4. Sides priority to force defensive stalemates
+      const sides = [1, 3, 5, 7].filter(s => empty.includes(s));
+      if (sides.length > 0) {
+        return sides[Math.floor(Math.random() * sides.length)];
+      }
+      // 5. Fallback
+      return empty[Math.floor(Math.random() * empty.length)];
+    }
+  },
+  chaos: {
+    name: "Chaos Monkey",
+    move: (empty) => {
+      // Chaos Monkey plays randomly, checking for win only 25% of the time
+      if (Math.random() < 0.25) {
+        for (const i of empty) {
+          board[i] = 1;
+          if (checkResult()?.winner === 1) { board[i] = null; return i; }
+          board[i] = null;
+        }
+      }
+      return empty[Math.floor(Math.random() * empty.length)];
+    }
+  }
+};
 
 // ─── Win lines ────────────────────────────────────────────────────────────────
 const WIN_LINES = [
@@ -44,6 +115,14 @@ const p1nameInput = document.getElementById('p1name');
 const p2nameInput = document.getElementById('p2nameInput');
 const p2setup = document.getElementById('p2setup');
 const p2label = document.getElementById('p2label');
+const cpuPersonaSelect = document.getElementById('cpuPersonaSelect');
+const cpuPersonaSetup = document.getElementById('cpuPersonaSetup');
+
+if (cpuPersonaSelect) {
+  cpuPersonaSelect.addEventListener('change', () => {
+    cpuPersona = cpuPersonaSelect.value;
+  });
+}
 
 // ─── Build color swatches ─────────────────────────────────────────────────────
 function buildSwatches() {
@@ -96,11 +175,13 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
       p2nameInput.value = 'Computer';
       p2nameInput.disabled = true;
       p2nameInput.style.opacity = '0.4';
+      if (cpuPersonaSetup) cpuPersonaSetup.classList.remove('hidden');
     } else {
       p2label.textContent = 'Player 2';
       p2nameInput.disabled = false;
       p2nameInput.style.opacity = '';
       if (p2nameInput.value === 'Computer') p2nameInput.value = '';
+      if (cpuPersonaSetup) cpuPersonaSetup.classList.add('hidden');
     }
   });
 });
@@ -190,28 +271,8 @@ function scheduleCpuMove() {
 
 function getBestCpuMove() {
   const empty = board.map((v, i) => v === null ? i : -1).filter(i => i >= 0);
-
-  // 70% chance to play smart, 30% chance to go random
-  const playDumb = Math.random() < 0.3;
-
-  if (!playDumb) {
-    // Win if possible
-    for (const i of empty) {
-      board[i] = 1;
-      if (checkResult()?.winner === 1) { board[i] = null; return i; }
-      board[i] = null;
-    }
-
-    // Block player from winning
-    for (const i of empty) {
-      board[i] = 0;
-      if (checkResult()?.winner === 0) { board[i] = null; return i; }
-      board[i] = null;
-    }
-  }
-
-  // Random
-  return empty[Math.floor(Math.random() * empty.length)];
+  const strategy = PERSONAS[cpuPersona] || PERSONAS.trapper;
+  return strategy.move(empty);
 }
 
 // ─── Win detection ────────────────────────────────────────────────────────────
@@ -230,6 +291,7 @@ function checkResult() {
 function endGame(result) {
   gameOver = true;
   cells.forEach(c => c.disabled = true);
+  const movesElapsed = board.filter(v => v !== null).length;
 
   if (result.winner !== null) {
     // Highlight winning cells
@@ -245,26 +307,44 @@ function endGame(result) {
     winTitle.textContent = `${winnerName} Wins!`;
     winSub.textContent = `Playing as ${winnerColor}`;
 
-    speak(`${winnerName} wins!`);
+    let speechText = "";
+    let rate = 1.0;
+    let pitch = 1.0;
+
+    if (movesElapsed <= 6) {
+      speechText = `Absolute domination! ${winnerName} crushed the competition in a lightning fast ${movesElapsed} moves! Outstanding performance!`;
+      rate = 1.25;
+      pitch = 1.35;
+    } else if (movesElapsed >= 8) {
+      speechText = `A monumental triumph! After a grueling battle of ${movesElapsed} moves, ${winnerName} emerges victorious from the ashes! What a spectacular showdown!`;
+      rate = 0.85;
+      pitch = 0.9;
+    } else {
+      speechText = `${winnerName} takes the victory in ${movesElapsed} moves! Well played.`;
+      rate = 1.0;
+      pitch = 1.1;
+    }
+
+    speak(speechText, rate, pitch);
   } else {
     scores[2]++;
     updateScoreUI();
     winEmoji.textContent = '🤝';
     winTitle.textContent = "It's a Draw!";
     winSub.textContent = 'Great game, both of you!';
-    speak("It's a draw!");
+    speak("A hard-fought stalemate. Neither side could break the wall! It is a draw.", 0.95, 1.0);
   }
 
   setTimeout(() => winOverlay.classList.remove('hidden'), 600);
 }
 
 // ─── Speech synthesis ─────────────────────────────────────────────────────────
-function speak(text) {
+function speak(text, rate = 0.95, pitch = 1.1) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
-  utt.rate = 0.95;
-  utt.pitch = 1.1;
+  utt.rate = rate;
+  utt.pitch = pitch;
   utt.volume = 1;
   window.speechSynthesis.speak(utt);
 }
@@ -316,6 +396,10 @@ buildSwatches();
     if (saved.p2name && saved.mode !== 'cpu') p2nameInput.value = saved.p2name;
     if (saved.p1color !== undefined) selectColor(0, saved.p1color);
     if (saved.p2color !== undefined) selectColor(1, saved.p2color);
+    if (saved.cpuPersona) {
+      cpuPersona = saved.cpuPersona;
+      if (cpuPersonaSelect) cpuPersonaSelect.value = cpuPersona;
+    }
     if (saved.mode) {
       mode = saved.mode;
       const btn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
@@ -327,6 +411,7 @@ buildSwatches();
           p2nameInput.value = 'Computer';
           p2nameInput.disabled = true;
           p2nameInput.style.opacity = '0.4';
+          if (cpuPersonaSetup) cpuPersonaSetup.classList.remove('hidden');
         }
       }
     }
@@ -341,6 +426,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
       p2name: p2nameInput.value.trim(),
       p1color: players[0].colorIdx,
       p2color: players[1].colorIdx,
+      cpuPersona,
       mode,
     }));
   } catch { }

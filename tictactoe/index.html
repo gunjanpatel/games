@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="tictactoe.css" />
 </head>
 
-<body>
+<body class="theme-ttt">
   <div class="layout-wrapper">
 
     <!-- ─── Header ─── -->
@@ -83,10 +83,20 @@
           </div>
 
           <!-- Player 2 / Computer -->
-          <div class="player-setup mb-8" id="p2setup">
+          <div class="player-setup mb-5" id="p2setup">
             <p class="label mb-2" id="p2label">Player 2</p>
             <input id="p2nameInput" type="text" maxlength="16" placeholder="Goga" value="Goga" class="name-input mb-3" />
             <div class="color-swatches" data-player="2"></div>
+          </div>
+
+          <!-- CPU Persona Selector -->
+          <div class="mb-8 hidden" id="cpuPersonaSetup">
+            <p class="label mb-2">Computer Persona</p>
+            <select id="cpuPersonaSelect" class="name-input">
+              <option value="trapper">The Trapper (Aggressive Corners)</option>
+              <option value="wall">The Wall (Center & Stalemate)</option>
+              <option value="chaos">Chaos Monkey (Playful Random)</option>
+            </select>
           </div>
 
           <button id="startBtn" class="btn-primary w-full justify-center text-base py-3" type="button">

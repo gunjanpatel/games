@@ -38,6 +38,11 @@ function getRenderedRotationDeg() {
 }
 
 function playTick() {
+    if (navigator.vibrate) {
+        try {
+            navigator.vibrate(10);
+        } catch (e) {}
+    }
     if (!tickSound) return;
     tickSound.play().catch(() => {
         // Ignore autoplay restrictions; interaction is user-driven.
@@ -90,14 +95,21 @@ function animateSpinTo(targetDegree, duration, easing) {
     spinBtn.disabled = true;
     lastTickIndex = indexFromDegree(previousEndDegree);
 
+    const diff = targetDegree - previousEndDegree;
+    // Calculate a realistic overshoot proportional to the spin distance
+    const overshootAmount = Math.min(12, Math.max(3, Math.abs(diff) * 0.006)) * Math.sign(diff);
+    const overshootDegree = targetDegree + overshootAmount;
+    const recoilDegree = targetDegree - overshootAmount * 0.25;
+
     spinAnimation = wheelList.animate(
         [
-            { transform: `rotate(${previousEndDegree}deg)` },
-            { transform: `rotate(${targetDegree}deg)` }
+            { transform: `rotate(${previousEndDegree}deg)`, offset: 0 },
+            { transform: `rotate(${overshootDegree}deg)`, offset: 0.82, easing: easing || "cubic-bezier(0.25, 1, 0.5, 1)" },
+            { transform: `rotate(${recoilDegree}deg)`, offset: 0.92, easing: "ease-in-out" },
+            { transform: `rotate(${targetDegree}deg)`, offset: 1, easing: "ease-in-out" }
         ],
         {
             duration,
-            easing,
             fill: "forwards",
             iterations: 1
         }

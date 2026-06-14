@@ -1,18 +1,57 @@
+@property --brand {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #a78bfa;
+}
+
+@property --brand-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #c4b5fd;
+}
+
+@property --brand-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(167, 139, 250, 0.15);
+}
+
 :root {
-  --bg: #000000;
-  --bg-subtle: #1c1c1e;
-  --bg-muted: #2c2c2e;
-  --border: rgba(255, 255, 255, 0.10);
+  --bg: #000000; /* Pure pitch black */
+  --bg-subtle: #0a0a0c; 
+  --bg-muted: #141416;
+  --border: rgba(255, 255, 255, 0.06);
   --text-1: #f2f2f7;
   --text-2: rgba(235, 235, 245, 0.75);
   --text-3: rgba(235, 235, 245, 0.50);
   --text-4: rgba(235, 235, 245, 0.25);
+  
+  /* Fallback defaults */
   --brand: #a78bfa;
   --brand-hover: #c4b5fd;
   --brand-soft: rgba(167, 139, 250, 0.15);
-  --glass-bg: rgba(28, 28, 30, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+  
+  --glass-bg: rgba(10, 10, 12, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Add theme transition support to elements using variables */
+body, header, .nav-link, .tag, .game-card {
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, --brand 0.4s ease, --brand-hover 0.4s ease, --brand-soft 0.4s ease;
+}
+
+/* Specific game override utility classes to inject via JS */
+body.theme-ttt {
+  --brand: #22d3ee;
+  --brand-hover: #67e8f9;
+  --brand-soft: rgba(34, 211, 238, 0.15);
+}
+
+body.theme-fortune {
+  --brand: #fbbf24;
+  --brand-hover: #fcd34d;
+  --brand-soft: rgba(251, 191, 36, 0.15);
 }
 
 html {
