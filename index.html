@@ -17,14 +17,14 @@
 <body>
   <div class="layout-wrapper">
 
-    <!-- ─── Header ─── -->
-    <header class="fixed top-0 left-0 right-0 z-50 h-14 flex items-center">
+    <header class="fixed top-0 left-0 right-0 z-50 h-14 flex items-center bg-[#1c1c1e]/80 backdrop-blur-md border-b border-[rgba(255,255,255,0.05)]">
       <div class="max-w-4xl mx-auto w-full px-5 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2.5 group text-decoration-none">
           <img src="https://gravatar.com/avatar/a71d5c71e4c2236145ec0b8058bf9508?s=400" alt="Gunjan Patel"
             class="w-7 h-7 rounded-full object-cover border border-[rgba(255,255,255,0.1)]" />
           <span class="font-semibold text-sm text-[#f2f2f7]">Gunjan Patel</span>
         </a>
+        
         <nav class="hidden md:flex items-center gap-7">
           <a href="https://gunjanpatel.info/about" class="nav-link">About</a>
           <a href="https://gunjanpatel.info/blog" class="nav-link">Blog</a>
@@ -38,7 +38,8 @@
           </div>
           <a href="https://games.gunjanpatel.info" class="nav-link">🎮 Games</a>
         </nav>
-        <div class="flex items-center gap-2">
+
+        <div class="flex items-center gap-4">
           <a href="https://github.com/gunjanpatel" target="_blank"
             class="text-[rgba(235,235,245,0.50)] hover:text-[#a78bfa] transition-colors" title="GitHub">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -46,25 +47,46 @@
               <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
             </svg>
           </a>
+
+          <button id="mobile-menu-btn" class="md:hidden text-[#f2f2f7] focus:outline-none cursor-pointer" aria-label="Toggle Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" 
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+              <line x1="4" y1="6" x2="20" y2="6"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+            </svg>
+          </button>
         </div>
       </div>
     </header>
 
-    <!-- ─── Hero ─── -->
+    <div id="mobile-menu" class="fixed inset-0 z-40 bg-[#1c1c1e] translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-24 px-6 gap-6">
+      <a href="https://gunjanpatel.info/about" class="text-lg font-medium text-[#f2f2f7] hover:text-[#a78bfa] transition-colors">About</a>
+      <a href="https://gunjanpatel.info/blog" class="text-lg font-medium text-[#f2f2f7] hover:text-[#a78bfa] transition-colors">Blog</a>
+      <a href="https://gunjanpatel.info/yoga" class="text-lg font-medium text-[#f2f2f7] hover:text-[#a78bfa] transition-colors">Yoga</a>
+      
+      <div class="border-t border-[rgba(255,255,255,0.08)] pt-5">
+        <span class="text-xs font-mono uppercase tracking-wider text-[rgba(235,235,245,0.3)]">Things I Built</span>
+        <div class="flex flex-col gap-4 mt-4 pl-2">
+          <a href="https://learn.gunjanpatel.info" class="text-base text-[#f2f2f7] hover:text-[#a78bfa] transition-colors">Learn</a>
+          <a href="https://shop.gunjanpatel.info" class="text-base text-[#f2f2f7] hover:text-[#a78bfa] transition-colors">Patel Flours</a>
+        </div>
+      </div>
+      
+      <a href="https://games.gunjanpatel.info" class="text-lg font-medium text-[#f2f2f7] hover:text-[#a78bfa] transition-colors border-t border-[rgba(255,255,255,0.08)] pt-5">🎮 Games</a>
+    </div>
+
     <main class="flex-1 pt-24 pb-16 px-5">
       <div class="max-w-3xl mx-auto">
 
-        <!-- Title -->
         <div class="text-center mb-12">
           <div class="hero-emoji">🎮</div>
           <h1 class="hero-title">Game Room</h1>
           <p class="hero-sub">No ads. No nonsense. Just fun.</p>
         </div>
 
-        <!-- Game Cards -->
         <div class="games-grid">
 
-          <!-- Fortune Wheel -->
           <a href="/fortune/" class="game-card game-card--fortune">
             <div class="game-card__glow"></div>
             <div class="game-card__icon">🎡</div>
@@ -79,7 +101,6 @@
             <div class="game-card__arrow">→</div>
           </a>
 
-          <!-- Tic Tac Toe -->
           <a href="/tictactoe/" class="game-card game-card--ttt">
             <div class="game-card__glow"></div>
             <div class="game-card__icon">⭕</div>
@@ -94,7 +115,6 @@
             <div class="game-card__arrow">→</div>
           </a>
 
-          <!-- Memory Match -->
           <a href="/memory/" class="game-card game-card--memory">
             <div class="game-card__glow"></div>
             <div class="game-card__icon">🧠</div>
@@ -109,7 +129,6 @@
             <div class="game-card__arrow">→</div>
           </a>
 
-          <!-- Gujarati Hub -->
           <a href="/gujarati/" class="game-card game-card--gujarati">
             <div class="game-card__glow"></div>
             <div class="game-card__icon">🦁</div>
@@ -125,7 +144,6 @@
             <div class="game-card__arrow">→</div>
           </a>
 
-          <!-- Coming soon placeholder -->
           <div class="game-card game-card--soon">
             <div class="game-card__icon">✨</div>
             <div class="game-card__body">
@@ -138,7 +156,6 @@
       </div>
     </main>
 
-    <!-- ─── Footer ─── -->
     <footer class="mt-auto border-t border-[rgba(255,255,255,0.08)]">
       <div class="max-w-4xl mx-auto px-5 py-12">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
@@ -171,6 +188,18 @@
       </div>
     </footer>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('translate-x-full');
+        document.body.classList.toggle('overflow-hidden');
+      });
+    });
+  </script>
 </body>
 
 </html>
