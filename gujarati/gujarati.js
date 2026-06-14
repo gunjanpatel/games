@@ -9,6 +9,14 @@ const TRAPS = {
   'ક': 'ફ', 'ફ': 'ક'
 };
 
+const WORDS = [
+  { text: 'કમળ', path: ['ક', 'મ', 'ળ'], english: 'Kamal (Lotus)' },
+  { text: 'અજગર', path: ['અ', 'જ', 'ગ', 'ર'], english: 'Ajgar (Python)' },
+  { text: 'વડ', path: ['વ', 'ડ'], english: 'Vad (Banyan Tree)' },
+  { text: 'ફળ', path: ['ફ', 'ળ'], english: 'Fal (Fruit)' },
+  { text: 'બતક', path: ['બ', 'ત', 'ક'], english: 'Batak (Duck)' }
+];
+
 const BARAKHADI_FORMULAS = [
   { c: 'ક', v: 'ા', result: 'કા', speak: 'Ka' },
   { c: 'ખ', v: 'િ', result: 'ખિ', speak: 'Khi' },
@@ -23,12 +31,82 @@ const BARAKHADI_FORMULAS = [
 ];
 
 const CIPHER_LETTERS = ['ક', 'ખ', 'ગ', 'ઘ', 'ચ', 'છ', 'જ', 'ઝ'];
-const CIPHER_PRONUNCIATIONS = {
+
+const PHONETIC_MAP = {
   'ક': 'Ka', 'ખ': 'Kha', 'ગ': 'Ga', 'ઘ': 'Gha',
-  'ચ': 'Cha', 'છ': 'Chha', 'જ': 'Ja', 'ઝ': 'Zha'
+  'ચ': 'Cha', 'છ': 'Chha', 'જ': 'Ja', 'ઝ': 'Zha',
+  'ટ': 'Ta', 'ઠ': 'Tha', 'ડ': 'Da', 'ઢ': 'Dha',
+  'ણ': 'Na', 'ત': 'Ta', 'થ': 'Tha', 'દ': 'Da',
+  'ધ': 'Dha', 'ન': 'Na', 'પ': 'Pa', 'ફ': 'Pha',
+  'બ': 'Ba', 'ભ': 'Bha', 'મ': 'Ma', 'ય': 'Ya',
+  'ર': 'Ra', 'લ': 'La', 'વ': 'Va', 'શ': 'Sha',
+  'ષ': 'Sha', 'સ': 'Sa', 'હ': 'Ha', 'ળ': 'La',
+  'ક્ષ': 'Ksha', 'જ્ઞ': 'Gnya',
+  'અ': 'Ah', 'મ': 'Ma', 'ળ': 'La', 'જ': 'Ja', 'ગ': 'Ga', 'ર': 'Ra', 'વ': 'Va', 'ડ': 'Da', 'ફ': 'Pha', 'ત': 'Ta',
+  'કા': 'Kaa', 'ખિ': 'Khi', 'ગી': 'Gee', 'ઘુ': 'Ghoo',
+  'ચૂ': 'Choo', 'છે': 'Chhay', 'જૈ': 'Jai', 'ટો': 'Toe',
+  'ઠૌ': 'Thau', 'ડં': 'Dam', 'ા': 'Aa', 'િ': 'I', 'ી': 'Ee', 'ુ': 'U', 'ૂ': 'Oo', 'ે': 'Ay', 'ૈ': 'Ai', 'ો': 'Oh', 'ૌ': 'Au', 'ં': 'Um'
 };
 
-// ─── Navigation & Highscores ─────────────────────────────────────────────────
+// ─── Touch, Scroll, & Gesture Locks ──────────────────────────────────────────
+// Prevent double-tap zoom
+let lastTapTime = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTapTime < 300) {
+    e.preventDefault();
+  }
+  lastTapTime = now;
+}, { passive: false });
+
+// Prevent single-finger drag scroll, allow two-finger panning
+document.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 1) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+// ─── Scoreboard Translation ──────────────────────────────────────────────────
+function toGujaratiNumerals(num) {
+  const guDigits = ['૦', '૧', '૨', '૩', '૪', '૫', '૬', '૭', '૮', '૯'];
+  return String(num).split('').map(char => {
+    return (char >= '0' && char <= '9') ? guDigits[Number(char)] : char;
+  }).join('');
+}
+
+// ─── Auditory Fallback Engine ────────────────────────────────────────────────
+function speakText(guText, engPhonetic = null) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  
+  const voices = window.speechSynthesis.getVoices();
+  const guVoice = voices.find(v => v.lang.startsWith('gu'));
+  
+  const utterance = new SpeechSynthesisUtterance(guText);
+  if (guVoice) {
+    utterance.voice = guVoice;
+    utterance.lang = 'gu-IN';
+  } else {
+    // Intercept missing locales and route to en-IN voice using mapping definitions
+    const enInVoice = voices.find(v => v.lang.startsWith('en-IN') || v.lang.startsWith('en'));
+    utterance.text = engPhonetic || PHONETIC_MAP[guText] || guText;
+    if (enInVoice) {
+      utterance.voice = enInVoice;
+      utterance.lang = 'en-IN';
+    }
+  }
+  
+  utterance.rate = 0.85;
+  utterance.pitch = 1.25;
+  window.speechSynthesis.speak(utterance);
+}
+
+// Warmed up voice trigger
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+
+// ─── Navigation & Achievements ───────────────────────────────────────────────
 function launchMode(mode) {
   document.getElementById('menuScreen').classList.add('hidden');
   document.getElementById('connectorView').classList.add('hidden');
@@ -55,59 +133,100 @@ function exitToMenu() {
   stopBlasterGame();
   clearInterval(cipherInterval);
   updateHighscoresUI();
+  updateMilestonesUI();
 }
 
 function updateHighscoresUI() {
-  const conn = localStorage.getItem('gujarati_connector_best') || '--';
-  const blast = localStorage.getItem('gujarati_blaster_best') || '--';
+  const conn = localStorage.getItem('gujarati_connector_best') || '0';
+  const blast = localStorage.getItem('gujarati_blaster_best') || '0';
   const ciph = localStorage.getItem('gujarati_cipher_best') || '--';
 
-  document.getElementById('bestConnector').textContent = conn !== '--' ? `${conn} steps` : '--';
-  document.getElementById('bestBlaster').textContent = blast !== '--' ? `${blast} pts` : '--';
-  document.getElementById('bestCipher').textContent = ciph !== '--' ? `${ciph}s` : '--';
+  document.getElementById('bestConnector').textContent = `${toGujaratiNumerals(conn)} / ${conn} paths`;
+  document.getElementById('bestBlaster').textContent = `${toGujaratiNumerals(blast)} / ${blast} pts`;
+  document.getElementById('bestCipher').textContent = ciph !== '--' ? `${toGujaratiNumerals(ciph)}s / ${ciph}s` : '--';
+}
+
+function updateMilestonesUI() {
+  const connBest = parseInt(localStorage.getItem('gujarati_connector_best') || '0');
+  const blastBest = parseInt(localStorage.getItem('gujarati_blaster_best') || '0');
+  const cipherBest = localStorage.getItem('gujarati_cipher_best');
+
+  // Badge 1: Kakko Master (completed 3 connector paths)
+  const badge1 = document.getElementById('badgeKakkoMaster');
+  if (connBest >= 3) {
+    badge1.classList.add('unlocked');
+    localStorage.setItem('gujarati_milestone_kakko_master', 'true');
+  } else {
+    badge1.classList.remove('unlocked');
+  }
+
+  // Badge 2: Barakhadi Combo Champion (score 10 pts)
+  const badge2 = document.getElementById('badgeBarakhadiChamp');
+  if (blastBest >= 10) {
+    badge2.classList.add('unlocked');
+    localStorage.setItem('gujarati_milestone_barakhadi_champ', 'true');
+  } else {
+    badge2.classList.remove('unlocked');
+  }
+
+  // Badge 3: Auditory Memory Wizard (complete Cipher in less than 25 seconds)
+  const badge3 = document.getElementById('badgeAudioWizard');
+  if (cipherBest !== null && cipherBest !== '--' && parseInt(cipherBest) < 25) {
+    badge3.classList.add('unlocked');
+    localStorage.setItem('gujarati_milestone_audio_wizard', 'true');
+  } else {
+    badge3.classList.remove('unlocked');
+  }
 }
 
 // ─── Mode A: Kakko Connector Logic ──────────────────────────────────────────
 let connectorPath = [];
 let connectorStepIndex = 0;
 let connectorCompletedPaths = 0;
+let connectorIsWord = false;
 
 function initConnector() {
   connectorStepIndex = 0;
-  // Generate random target sequence of length 4 from KAKKO (sequential)
-  const startIndex = Math.floor(Math.random() * (KAKKO.length - 4));
-  connectorPath = KAKKO.slice(startIndex, startIndex + 4);
+  
+  // 50% chance to spelling spell-out a word, 50% chance standard sequence
+  connectorIsWord = Math.random() < 0.5;
+  if (connectorIsWord) {
+    const wordData = WORDS[Math.floor(Math.random() * WORDS.length)];
+    connectorPath = wordData.path;
+    
+    // Update target
+    document.getElementById('connectorTarget').innerHTML = `${connectorPath.join(' → ')}<br><span class="text-xs text-[rgba(255,255,255,0.4)] italic">${wordData.text} (${wordData.english})</span>`;
+  } else {
+    const startIndex = Math.floor(Math.random() * (KAKKO.length - 4));
+    connectorPath = KAKKO.slice(startIndex, startIndex + 4);
+    document.getElementById('connectorTarget').textContent = connectorPath.join(' → ');
+  }
 
-  // Update target display
-  document.getElementById('connectorTarget').textContent = connectorPath.join(' → ');
-  document.getElementById('connectorStep').textContent = `0/${connectorPath.length}`;
+  updateConnectorStepUI();
 
   const grid = document.getElementById('connectorGrid');
   grid.innerHTML = '';
 
-  // Prepare tile contents: 4 correct path nodes, trap nodes, and fillers
   const tilesData = [];
   connectorPath.forEach(char => {
     tilesData.push({ char, type: 'path' });
-    // Add trap if exists
+    // Inject Adjacent Traps to build children shape recognition skills
     if (TRAPS[char]) {
       tilesData.push({ char: TRAPS[char], type: 'trap' });
     }
   });
 
-  // Fill up to 16 tiles
+  // Populate remaining grid spaces
   while (tilesData.length < 16) {
-    const randomChar = KAKKO[Math.floor(Math.random() * KAKKO.length)];
-    if (!connectorPath.includes(randomChar) && !tilesData.some(t => t.char === randomChar)) {
-      tilesData.push({ char: randomChar, type: 'filler' });
+    const filler = KAKKO[Math.floor(Math.random() * KAKKO.length)];
+    if (!connectorPath.includes(filler) && !tilesData.some(t => t.char === filler)) {
+      tilesData.push({ char: filler, type: 'filler' });
     }
   }
 
-  // Shuffle tiles
   shuffle(tilesData);
 
-  // Render Grid
-  tilesData.forEach((tile, index) => {
+  tilesData.forEach(tile => {
     const tileEl = document.createElement('button');
     tileEl.className = 'connector-tile';
     tileEl.textContent = tile.char;
@@ -122,31 +241,39 @@ function initConnector() {
 }
 
 function handleConnectorClick(tileEl, char) {
-  const expectedChar = connectorPath[connectorStepIndex];
-  if (char === expectedChar) {
-    // Correct step
+  const expected = connectorPath[connectorStepIndex];
+  if (char === expected) {
     tileEl.classList.add('correct');
-    speakText(char === 'ક' ? 'Ka' : char);
+    speakText(char, PHONETIC_MAP[char]);
     connectorStepIndex++;
-    document.getElementById('connectorStep').textContent = `${connectorStepIndex}/${connectorPath.length}`;
+    updateConnectorStepUI();
 
     if (connectorStepIndex === connectorPath.length) {
-      // Game Won
+      // Complete path
       connectorCompletedPaths++;
-      const currentBest = localStorage.getItem('gujarati_connector_best');
-      if (!currentBest || connectorCompletedPaths > parseInt(currentBest)) {
+      const currentBest = localStorage.getItem('gujarati_connector_best') || 0;
+      if (connectorCompletedPaths > parseInt(currentBest)) {
         localStorage.setItem('gujarati_connector_best', connectorCompletedPaths);
       }
-      showWinOverlay(`Completed ${connectorCompletedPaths} connector path(s) successfully!`, `🎉 Path Tracing Master!`);
+      
+      showWinOverlay(
+        `શાબાશ! Completed ${connectorCompletedPaths} connector path(s) successfully!`,
+        `🎉 કક્કો માસ્ટર! Path Tracing Success!`
+      );
     }
   } else {
-    // Wrong step: highlight trap/error
     tileEl.classList.add('wrong');
-    speakText("Uh oh!");
+    speakText("ভૂલ છે", "Wrong letter");
     setTimeout(() => {
       tileEl.classList.remove('wrong');
     }, 500);
   }
+}
+
+function updateConnectorStepUI() {
+  const guIdx = toGujaratiNumerals(connectorStepIndex);
+  const guLen = toGujaratiNumerals(connectorPath.length);
+  document.getElementById('connectorStep').textContent = `${guIdx} / ${connectorStepIndex} / ${connectorPath.length}`;
 }
 
 // ─── Mode B: Barakhadi Blaster (Phonetic Equation Matcher) ───────────────────
@@ -159,42 +286,41 @@ let blasterTarget = null;
 let bubbles = [];
 let blasterAnimationFrame = null;
 
+// Dismantle progression variables
+let blasterDismantleActive = false;
+let blasterDismantleStage = 0; // 0: Consonant, 1: Vowel sign
+
 function initBlaster() {
   blasterCanvas = document.getElementById('blasterCanvas');
   blasterCtx = blasterCanvas.getContext('2d');
   
-  // Fit canvas sizes
   resizeBlasterCanvas();
   
   blasterScore = 0;
   blasterTimeLeft = 30;
   bubbles = [];
   blasterActive = true;
+  blasterDismantleActive = false;
 
-  document.getElementById('blasterScore').textContent = '0';
-  document.getElementById('blasterTimer').textContent = '30s';
+  updateBlasterScoreUI();
+  updateBlasterTimerUI();
   document.getElementById('blasterStartBtn').textContent = 'Restart Blaster';
 
-  // Clear timers
   clearInterval(blasterTimerInterval);
   cancelAnimationFrame(blasterAnimationFrame);
 
-  // Create new equation target
   nextBlasterTarget();
 
-  // Bind click/tap
   blasterCanvas.onclick = handleBlasterClick;
 
-  // Start timers
   blasterTimerInterval = setInterval(() => {
     blasterTimeLeft--;
-    document.getElementById('blasterTimer').textContent = `${blasterTimeLeft}s`;
+    updateBlasterTimerUI();
     if (blasterTimeLeft <= 0) {
       endBlasterGame();
     }
   }, 1000);
 
-  // Animation Loop
   blasterLoop();
 }
 
@@ -207,15 +333,27 @@ function resizeBlasterCanvas() {
 function nextBlasterTarget() {
   blasterTarget = BARAKHADI_FORMULAS[Math.floor(Math.random() * BARAKHADI_FORMULAS.length)];
   
-  // Decide progression: Older kids see combined syllable, younger see addition
-  const isAdvanced = blasterScore >= 5;
+  // If score >= 5, launch the advanced component popping dismantler
+  blasterDismantleActive = blasterScore >= 5;
+  blasterDismantleStage = 0;
+
   const targetLabel = document.getElementById('blasterTargetFormula');
   
-  if (isAdvanced) {
-    targetLabel.textContent = `Linguistic Dismantle: ${blasterTarget.result} = ? + ${blasterTarget.v}`;
+  if (blasterDismantleActive) {
+    targetLabel.innerHTML = `<span class="text-red-400">Dismantle: ${blasterTarget.result}</span><br><span class="text-sm font-medium text-[rgba(235,235,245,0.4)] italic">Pop root base consonant: ${blasterTarget.c} first!</span>`;
   } else {
     targetLabel.textContent = `${blasterTarget.c} + ${blasterTarget.v} = ?`;
   }
+}
+
+function updateBlasterScoreUI() {
+  const guScore = toGujaratiNumerals(blasterScore);
+  document.getElementById('blasterScore').textContent = `${guScore} / ${blasterScore}`;
+}
+
+function updateBlasterTimerUI() {
+  const guTime = toGujaratiNumerals(blasterTimeLeft);
+  document.getElementById('blasterTimer').textContent = `${guTime}s / ${blasterTimeLeft}s`;
 }
 
 function spawnBubble() {
@@ -224,21 +362,23 @@ function spawnBubble() {
   const radius = 35 + Math.random() * 10;
   const x = radius + Math.random() * (blasterCanvas.width - radius * 2);
   const y = blasterCanvas.height + radius;
-  const speed = 1.2 + Math.random() * 1.5;
+  const speed = 1.0 + Math.random() * 1.5;
   
-  // Choose value: either the correct result, components, or fake options
   const randFormula = BARAKHADI_FORMULAS[Math.floor(Math.random() * BARAKHADI_FORMULAS.length)];
   let value = randFormula.result;
   
-  const isAdvanced = blasterScore >= 5;
-  if (isAdvanced) {
-    // Spawn root consonants instead of blends
-    value = Math.random() < 0.4 ? blasterTarget.c : randFormula.c;
+  if (blasterDismantleActive) {
+    // Spawn components (consonants and vowel signs)
+    if (Math.random() < 0.5) {
+      value = Math.random() < 0.4 ? blasterTarget.c : randFormula.c;
+    } else {
+      value = Math.random() < 0.4 ? blasterTarget.v : randFormula.v;
+    }
   } else {
     value = Math.random() < 0.4 ? blasterTarget.result : randFormula.result;
   }
 
-  bubbles.push({ x, y, radius, speed, value, color: `hsl(${20 + Math.random() * 40}, 90%, 60%)` });
+  bubbles.push({ x, y, radius, speed, value, color: `hsl(${30 + Math.random() * 30}, 90%, 60%)` });
 }
 
 function blasterLoop() {
@@ -246,14 +386,11 @@ function blasterLoop() {
 
   blasterCtx.clearRect(0, 0, blasterCanvas.width, blasterCanvas.height);
 
-  // Spawn bubbles periodically
   if (Math.random() < 0.02) spawnBubble();
 
-  // Draw & Update Bubbles
-  bubbles.forEach((bubble, index) => {
+  bubbles.forEach(bubble => {
     bubble.y -= bubble.speed;
 
-    // Draw bubble outline & glow
     blasterCtx.beginPath();
     blasterCtx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
     blasterCtx.fillStyle = bubble.color + '22';
@@ -262,7 +399,6 @@ function blasterLoop() {
     blasterCtx.strokeStyle = bubble.color;
     blasterCtx.stroke();
 
-    // Draw Character text
     blasterCtx.fillStyle = '#ffffff';
     blasterCtx.font = 'bold 24px Inter, system-ui';
     blasterCtx.textAlign = 'center';
@@ -270,9 +406,7 @@ function blasterLoop() {
     blasterCtx.fillText(bubble.value, bubble.x, bubble.y);
   });
 
-  // Filter out bubbles floating off-screen
   bubbles = bubbles.filter(b => b.y + b.radius > 0);
-
   blasterAnimationFrame = requestAnimationFrame(blasterLoop);
 }
 
@@ -283,27 +417,48 @@ function handleBlasterClick(event) {
   const clickX = event.clientX - rect.left;
   const clickY = event.clientY - rect.top;
 
-  // Check bubble collision
   bubbles.forEach((bubble, idx) => {
     const dist = Math.hypot(clickX - bubble.x, clickY - bubble.y);
     if (dist <= bubble.radius) {
-      // Pop!
       bubbles.splice(idx, 1);
       
-      const isAdvanced = blasterScore >= 5;
-      const expectedMatch = isAdvanced ? blasterTarget.c : blasterTarget.result;
-
-      if (bubble.value === expectedMatch) {
-        // Correct pop
-        blasterScore++;
-        document.getElementById('blasterScore').textContent = blasterScore;
-        speakText(blasterTarget.speak);
-        nextBlasterTarget();
+      if (blasterDismantleActive) {
+        // Dismantling sequence checks
+        if (blasterDismantleStage === 0) {
+          if (bubble.value === blasterTarget.c) {
+            blasterDismantleStage = 1;
+            speakText(blasterTarget.c, PHONETIC_MAP[blasterTarget.c]);
+            
+            // Update prompt to ask for vowel component
+            const targetLabel = document.getElementById('blasterTargetFormula');
+            targetLabel.innerHTML = `<span class="text-green-400">Popped ${blasterTarget.c}!</span><br><span class="text-sm font-medium text-[rgba(235,235,245,0.4)] italic">Now pop Vowel Sign: ${blasterTarget.v}!</span>`;
+          } else {
+            blasterTimeLeft = Math.max(0, blasterTimeLeft - 3);
+            speakText("ખોટું", "Whoops");
+          }
+        } else if (blasterDismantleStage === 1) {
+          if (bubble.value === blasterTarget.v) {
+            // Completed!
+            blasterScore++;
+            updateBlasterScoreUI();
+            speakText(blasterTarget.result, PHONETIC_MAP[blasterTarget.result]);
+            nextBlasterTarget();
+          } else {
+            blasterTimeLeft = Math.max(0, blasterTimeLeft - 3);
+            speakText("ખોટું", "Whoops");
+          }
+        }
       } else {
-        // Incorrect pop: lose time
-        blasterTimeLeft = Math.max(0, blasterTimeLeft - 3);
-        document.getElementById('blasterTimer').textContent = `${blasterTimeLeft}s`;
-        speakText("Whoops!");
+        // Standard check
+        if (bubble.value === blasterTarget.result) {
+          blasterScore++;
+          updateBlasterScoreUI();
+          speakText(blasterTarget.result, PHONETIC_MAP[blasterTarget.result]);
+          nextBlasterTarget();
+        } else {
+          blasterTimeLeft = Math.max(0, blasterTimeLeft - 3);
+          speakText("ખોટું", "Whoops");
+        }
       }
     }
   });
@@ -311,25 +466,16 @@ function handleBlasterClick(event) {
 
 function endBlasterGame() {
   stopBlasterGame();
-  
   const currentBest = localStorage.getItem('gujarati_blaster_best') || 0;
   let isNew = false;
   if (blasterScore > parseInt(currentBest)) {
     localStorage.setItem('gujarati_blaster_best', blasterScore);
     isNew = true;
   }
-
-  showWinOverlay(`Popped matching Barakhadi syllables, scoring ${blasterScore} points!`, `🏆 Kinetic Blaster Winner!`, isNew);
-}
-
-function stopBlasterGame() {
-  blasterActive = false;
-  clearInterval(blasterTimerInterval);
-  cancelAnimationFrame(blasterAnimationFrame);
+  showWinOverlay(`Matched all syllables, scoring ${blasterScore} points!`, `🏆 બારાખડી ચેમ્પિયન! Barakhadi Blaster Victory!`, isNew);
 }
 
 // ─── Mode C: Kakko Audio Cipher Logic ────────────────────────────────────────
-let cipherCards = [];
 let cipherFlipped = [];
 let cipherMatches = 0;
 let cipherTurns = 0;
@@ -344,16 +490,20 @@ function initCipher() {
   cipherFlipped = [];
   cipherActive = true;
 
-  document.getElementById('cipherFlips').textContent = '0';
-  document.getElementById('cipherTime').textContent = '0s';
+  updateCipherFlipsUI();
+  updateCipherTimeUI();
 
   clearInterval(cipherInterval);
-  startCipherTimer();
+  cipherInterval = setInterval(() => {
+    if (cipherActive) {
+      cipherTimeElapsed++;
+      updateCipherTimeUI();
+    }
+  }, 1000);
 
   const grid = document.getElementById('cipherGrid');
   grid.innerHTML = '';
 
-  // Prepare deck: 8 spoken cards (type A) & 8 written glyph cards (type B)
   const deck = [];
   CIPHER_LETTERS.forEach(char => {
     deck.push({ char, type: 'audio' });
@@ -372,25 +522,23 @@ function initCipher() {
     cardEl.innerHTML = `
       <div class="cipher-inner w-full h-full">
         <div class="cipher-front font-semibold">❓</div>
-        <div class="cipher-back">${card.type === 'audio' ? '🔊' : card.char}</div>
+        <div class="cipher-back font-bold">${card.type === 'audio' ? '🔊' : card.char}</div>
       </div>
     `;
 
-    cardEl.addEventListener('click', () => {
-      handleCipherClick(cardEl);
-    });
-
+    cardEl.addEventListener('click', () => handleCipherClick(cardEl));
     grid.appendChild(cardEl);
   });
 }
 
-function startCipherTimer() {
-  cipherInterval = setInterval(() => {
-    if (cipherActive) {
-      cipherTimeElapsed++;
-      document.getElementById('cipherTime').textContent = `${cipherTimeElapsed}s`;
-    }
-  }, 1000);
+function updateCipherFlipsUI() {
+  const guFlips = toGujaratiNumerals(cipherTurns);
+  document.getElementById('cipherFlips').textContent = `${guFlips} / ${cipherTurns}`;
+}
+
+function updateCipherTimeUI() {
+  const guTime = toGujaratiNumerals(cipherTimeElapsed);
+  document.getElementById('cipherTime').textContent = `${guTime}s / ${cipherTimeElapsed}s`;
 }
 
 function handleCipherClick(cardEl) {
@@ -401,23 +549,20 @@ function handleCipherClick(cardEl) {
   cardEl.classList.add('flipped');
   cipherFlipped.push(cardEl);
 
-  // If audio card is flipped, play phonic pronunciation
   if (cardEl.dataset.type === 'audio') {
     const char = cardEl.dataset.char;
-    speakText(CIPHER_PRONUNCIATIONS[char] || char);
+    speakText(char, PHONETIC_MAP[char]);
   }
 
   if (cipherFlipped.length === 2) {
     cipherTurns++;
-    document.getElementById('cipherFlips').textContent = cipherTurns;
+    updateCipherFlipsUI();
     checkCipherMatch();
   }
 }
 
 function checkCipherMatch() {
   const [c1, c2] = cipherFlipped;
-  
-  // Match if same character and different types (one audio card + one written card)
   const isMatch = (c1.dataset.char === c2.dataset.char) && (c1.dataset.type !== c2.dataset.type);
 
   if (isMatch) {
@@ -449,7 +594,11 @@ function endCipherGame() {
     isNew = true;
   }
 
-  showWinOverlay(`Completed the auditory match in ${cipherTurns} turns and ${cipherTimeElapsed} seconds!`, `👂 Auditory Cipher Success!`, isNew);
+  showWinOverlay(
+    `Completed auditory matching in ${cipherTurns} turns and ${cipherTimeElapsed} seconds!`,
+    `👂 શ્રવણ વિઝાર્ડ! Memory Match Complete!`,
+    isNew
+  );
 }
 
 // ─── Shared Utilities ────────────────────────────────────────────────────────
@@ -458,16 +607,6 @@ function shuffle(array) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
-}
-
-function speakText(text) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'gu-IN'; // set language to Gujarati
-  utterance.rate = 0.9;
-  utterance.pitch = 1.25;
-  window.speechSynthesis.speak(utterance);
 }
 
 function showWinOverlay(statsText, titleText, isNewRecord = false) {
@@ -480,10 +619,8 @@ function showWinOverlay(statsText, titleText, isNewRecord = false) {
   const overlay = document.getElementById('winOverlay');
   overlay.classList.remove('hidden');
 
-  // Configure play again buttons to restart the active mode
   document.getElementById('overlayPlayAgain').onclick = () => {
     overlay.classList.add('hidden');
-    // Detect active screen
     if (!document.getElementById('connectorView').classList.contains('hidden')) {
       initConnector();
     } else if (!document.getElementById('blasterView').classList.contains('hidden')) {
@@ -494,7 +631,8 @@ function showWinOverlay(statsText, titleText, isNewRecord = false) {
   };
 }
 
-// Load highscores on mount
+// Load launcher states on mount
 window.onload = () => {
   updateHighscoresUI();
+  updateMilestonesUI();
 };

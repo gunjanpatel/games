@@ -55,8 +55,8 @@
       <section id="menuScreen" class="w-full max-w-4xl mt-6">
         <div class="text-center mb-10">
           <div class="text-6xl mb-3">🦁</div>
-          <h1 class="page-title text-4xl">Gujarati Hub</h1>
-          <p class="text-sm text-[rgba(235,235,245,0.50)] mt-2">Fun, interactive brain-training games to master Kakko & Barakhadi!</p>
+          <h1 class="text-4xl font-extrabold text-amber-400 tracking-wide mb-1">ગુજરાતી હબ</h1>
+          <p class="text-sm font-medium text-[rgba(235,235,245,0.40)] italic">Gujarati Hub — Kakko & Barakhadi Trainer</p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
@@ -64,8 +64,9 @@
           <div class="game-selector-card glass-panel p-6 flex flex-col justify-between">
             <div>
               <div class="text-4xl mb-3">🧩</div>
-              <h3 class="text-xl font-bold text-white mb-2">Kakko Connector</h3>
-              <p class="text-sm text-[rgba(235,235,245,0.6)] mb-4">Connect Gujarati letters in alphabetical order! Look out for trap letters!</p>
+              <h3 class="text-xl font-bold text-amber-400 mb-1">કક્કો કનેક્ટર</h3>
+              <p class="text-xs font-semibold text-[rgba(235,235,245,0.40)] italic mb-3">Kakko Connector</p>
+              <p class="text-sm text-[rgba(235,235,245,0.6)] mb-4 leading-relaxed">Connect Gujarati letters in alphabetical order! Look out for trap letters!</p>
               <div class="text-xs text-[rgba(235,235,245,0.4)] font-mono">Best Score: <span id="bestConnector">--</span></div>
             </div>
             <button onclick="launchMode('connector')" class="btn-primary mt-6 w-full justify-center">Play Connector</button>
@@ -75,8 +76,9 @@
           <div class="game-selector-card glass-panel p-6 flex flex-col justify-between">
             <div>
               <div class="text-4xl mb-3">☄️</div>
-              <h3 class="text-xl font-bold text-white mb-2">Barakhadi Blaster</h3>
-              <p class="text-sm text-[rgba(235,235,245,0.6)] mb-4">Solve equations! Match Vowel signs to create syllables, or pop root components!</p>
+              <h3 class="text-xl font-bold text-amber-400 mb-1">બારાખડી બ્લાસ્ટર</h3>
+              <p class="text-xs font-semibold text-[rgba(235,235,245,0.40)] italic mb-3">Barakhadi Blaster</p>
+              <p class="text-sm text-[rgba(235,235,245,0.6)] mb-4 leading-relaxed">Solve equations! Match Vowel signs to create syllables, or pop root components!</p>
               <div class="text-xs text-[rgba(235,235,245,0.4)] font-mono">Best Score: <span id="bestBlaster">--</span></div>
             </div>
             <button onclick="launchMode('blaster')" class="btn-primary mt-6 w-full justify-center">Play Blaster</button>
@@ -86,11 +88,44 @@
           <div class="game-selector-card glass-panel p-6 flex flex-col justify-between">
             <div>
               <div class="text-4xl mb-3">👂</div>
-              <h3 class="text-xl font-bold text-white mb-2">Audio Cipher</h3>
-              <p class="text-sm text-[rgba(235,235,245,0.6)] mb-4">Flipped cards speak character sounds aloud. Match the voice to the written letter!</p>
+              <h3 class="text-xl font-bold text-amber-400 mb-1">કક્કો ઓડિયો સાયફર</h3>
+              <p class="text-xs font-semibold text-[rgba(235,235,245,0.40)] italic mb-3">Audio Cipher</p>
+              <p class="text-sm text-[rgba(235,235,245,0.6)] mb-4 leading-relaxed">Flipped cards speak character sounds aloud. Match the voice to the written letter!</p>
               <div class="text-xs text-[rgba(235,235,245,0.4)] font-mono">Best Time: <span id="bestCipher">--</span></div>
             </div>
             <button onclick="launchMode('cipher')" class="btn-primary mt-6 w-full justify-center">Play Cipher</button>
+          </div>
+        </div>
+
+        <!-- Milestone Achievement Plaques -->
+        <div class="mt-10 glass-panel p-6">
+          <h4 class="text-lg font-bold text-amber-400 mb-1">સિદ્ધિઓ અને સીમાચિહ્નો</h4>
+          <p class="text-xs text-[rgba(235,235,245,0.40)] italic mb-5">Milestones & Achievements</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Plaque 1 -->
+            <div id="badgeKakkoMaster" class="milestone-badge">
+              <span class="text-2xl">🎓</span>
+              <div>
+                <div class="text-sm font-bold text-white">કક્કો માસ્ટર</div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.5)] italic">Kakko Master (3 Paths)</div>
+              </div>
+            </div>
+            <!-- Plaque 2 -->
+            <div id="badgeBarakhadiChamp" class="milestone-badge">
+              <span class="text-2xl">⚡</span>
+              <div>
+                <div class="text-sm font-bold text-white">બારાખડી ચેમ્પિયન</div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.5)] italic">Barakhadi Champ (10 pts)</div>
+              </div>
+            </div>
+            <!-- Plaque 3 -->
+            <div id="badgeAudioWizard" class="milestone-badge">
+              <span class="text-2xl">👂</span>
+              <div>
+                <div class="text-sm font-bold text-white">શ્રવણ વિઝાર્ડ</div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.5)] italic">Memory Wizard (&lt; 25s)</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -98,17 +133,25 @@
       <!-- MODE A: KAKKO CONNECTOR VIEW -->
       <section id="connectorView" class="hidden w-full max-w-lg mt-6">
         <div class="glass-panel p-6 mb-5">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-semibold text-[rgba(235,235,245,0.6)] uppercase tracking-wider">Mode: Kakko Connector</span>
-            <div class="flex gap-4">
-              <span class="text-sm font-mono text-white">Target: <span id="connectorTarget" class="font-bold text-[#f97316]">ક → ખ → ગ</span></span>
-              <span class="text-sm font-mono text-white">Steps: <span id="connectorStep">0/4</span></span>
+          <div class="flex items-center justify-between mb-4 border-b border-[rgba(255,255,255,0.06)] pb-3">
+            <div>
+              <h2 class="text-xl font-bold text-amber-400">કક્કો કનેક્ટર</h2>
+              <p class="text-[10px] font-medium text-[rgba(235,235,245,0.40)] italic">Kakko Connector</p>
+            </div>
+            <div class="flex gap-4 text-right">
+              <div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.40)] font-semibold uppercase font-mono">Steps / પગલાં</div>
+                <div class="text-base font-bold text-white" id="connectorStep">૦ / 0 / 4</div>
+              </div>
             </div>
           </div>
-          <p class="text-xs text-[rgba(235,235,245,0.5)] mb-4">Click and drag nodes or click them in exact sequence! Stay away from decoy letters!</p>
+          <div class="mb-4 text-center bg-black/40 py-2.5 px-4 rounded-xl">
+            <span class="text-xs text-[rgba(235,235,245,0.5)] block mb-1">Target Path / લક્ષ્ય પાથ</span>
+            <span class="text-lg font-bold text-white" id="connectorTarget">ક → ખ → ગ</span>
+          </div>
           
           <!-- Pathfinding Grid -->
-          <div class="grid grid-cols-4 gap-4 aspect-square w-full" id="connectorGrid">
+          <div class="grid grid-cols-4 gap-3 aspect-square w-full" id="connectorGrid">
             <!-- Grid tiles populated via JS -->
           </div>
         </div>
@@ -122,17 +165,26 @@
       <!-- MODE B: BARAKHADI BLASTER VIEW -->
       <section id="blasterView" class="hidden w-full max-w-2xl mt-4">
         <div class="glass-panel p-6 mb-5">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-semibold text-[rgba(235,235,245,0.6)] uppercase tracking-wider">Mode: Barakhadi Blaster</span>
-            <div class="flex gap-6">
-              <span class="text-sm font-mono text-white">Score: <span id="blasterScore" class="font-bold">0</span></span>
-              <span class="text-sm font-mono text-white">Time: <span id="blasterTimer" class="font-bold">30s</span></span>
+          <div class="flex items-center justify-between mb-3 border-b border-[rgba(255,255,255,0.06)] pb-3">
+            <div>
+              <h2 class="text-xl font-bold text-amber-400">બારાખડી બ્લાસ્ટર</h2>
+              <p class="text-[10px] font-medium text-[rgba(235,235,245,0.40)] italic">Barakhadi Blaster</p>
+            </div>
+            <div class="flex gap-6 text-right">
+              <div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.40)] font-semibold uppercase font-mono">Score / સ્કોર</div>
+                <div class="text-base font-bold text-white" id="blasterScore">૦ / 0</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.40)] font-semibold uppercase font-mono">Time / સમય</div>
+                <div class="text-base font-bold text-white" id="blasterTimer">૩૦s / 30s</div>
+              </div>
             </div>
           </div>
           
           <!-- Target Display Panel -->
           <div class="bg-black/50 border border-[rgba(255,255,255,0.06)] rounded-xl py-4 px-6 text-center mb-4">
-            <div class="text-xs text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1">Pop the bubble matching:</div>
+            <div class="text-xs text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1">Pop the bubble matching / બબલ પોપ કરો:</div>
             <div class="text-3xl font-extrabold text-[#f97316]" id="blasterTargetFormula">ક + ા = ?</div>
           </div>
 
@@ -151,14 +203,22 @@
       <!-- MODE C: AUDIO CIPHER VIEW -->
       <section id="cipherView" class="hidden w-full max-w-lg mt-6">
         <div class="glass-panel p-6 mb-5">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-semibold text-[rgba(235,235,245,0.6)] uppercase tracking-wider">Mode: Audio Cipher</span>
-            <div class="flex gap-4">
-              <span class="text-sm font-mono text-white">Turns: <span id="cipherFlips">0</span></span>
-              <span class="text-sm font-mono text-white">Time: <span id="cipherTime">0s</span></span>
+          <div class="flex items-center justify-between mb-4 border-b border-[rgba(255,255,255,0.06)] pb-3">
+            <div>
+              <h2 class="text-xl font-bold text-amber-400">ઓડિયો સાયફર</h2>
+              <p class="text-[10px] font-medium text-[rgba(235,235,245,0.40)] italic">Audio Cipher</p>
+            </div>
+            <div class="flex gap-4 text-right">
+              <div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.40)] font-semibold uppercase font-mono">Turns / વળાંક</div>
+                <div class="text-base font-bold text-white" id="cipherFlips">૦ / 0</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-[rgba(235,235,245,0.40)] font-semibold uppercase font-mono">Time / સમય</div>
+                <div class="text-base font-bold text-white" id="cipherTime">૦s / 0s</div>
+              </div>
             </div>
           </div>
-          <p class="text-xs text-[rgba(235,235,245,0.5)] mb-4 font-sans">Flip a card to hear its phonic pronunciation. Then find the card writing the matching Gujarati character!</p>
           
           <!-- Grid -->
           <div class="grid grid-cols-4 gap-3 aspect-square w-full" id="cipherGrid">
@@ -176,8 +236,9 @@
       <div id="winOverlay" class="win-overlay hidden">
         <div class="win-card glass-panel">
           <div class="win-emoji">🏆</div>
-          <h2 class="win-title">Victory!</h2>
-          <p class="win-sub" id="winStats">Completed in record time!</p>
+          <h2 class="win-title text-amber-400 font-extrabold text-3xl">અભિનંદન!</h2>
+          <p class="text-xs font-semibold text-[rgba(235,235,245,0.40)] italic mb-3">Congratulations!</p>
+          <p class="win-sub font-bold text-white" id="winStats">Completed in record time!</p>
           <p class="text-xs text-[rgba(235,235,245,0.40)] mt-2" id="newRecordText"></p>
           <div class="flex gap-3 mt-6">
             <button id="overlayPlayAgain" class="btn-primary flex-1 justify-center" type="button">Play Again 🔁</button>

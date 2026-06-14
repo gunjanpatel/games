@@ -1,3 +1,9 @@
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 @property --brand {
   syntax: '<color>';
   inherits: true;
@@ -399,4 +405,25 @@ header {
   color: var(--text-3);
   font-size: 0.95rem;
   margin: 0;
+}
+
+/* ─── Milestones Achievement Badges ─── */
+.milestone-badge {
+  background: rgba(249, 115, 22, 0.04);
+  border: 1px dashed rgba(249, 115, 22, 0.2);
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  transition: all 0.3s ease;
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+.milestone-badge.unlocked {
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid var(--brand);
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.2);
+  filter: none;
+  opacity: 1;
 }
