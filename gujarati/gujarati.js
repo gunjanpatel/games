@@ -78,10 +78,10 @@ function toGujaratiNumerals(num) {
 function speakText(guText, engPhonetic = null) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  
+
   const voices = window.speechSynthesis.getVoices();
   const guVoice = voices.find(v => v.lang.startsWith('gu'));
-  
+
   const utterance = new SpeechSynthesisUtterance(guText);
   if (guVoice) {
     utterance.voice = guVoice;
@@ -95,7 +95,7 @@ function speakText(guText, engPhonetic = null) {
       utterance.lang = 'en-IN';
     }
   }
-  
+
   utterance.rate = 0.85;
   utterance.pitch = 1.25;
   window.speechSynthesis.speak(utterance);
@@ -103,7 +103,7 @@ function speakText(guText, engPhonetic = null) {
 
 // Warmed up voice trigger
 if ('speechSynthesis' in window) {
-  window.speechSynthesis.onvoiceschanged = () => {};
+  window.speechSynthesis.onvoiceschanged = () => { };
 }
 
 // ─── Navigation & Achievements ───────────────────────────────────────────────
@@ -187,13 +187,13 @@ let connectorIsWord = false;
 
 function initConnector() {
   connectorStepIndex = 0;
-  
+
   // 50% chance to spelling spell-out a word, 50% chance standard sequence
   connectorIsWord = Math.random() < 0.5;
   if (connectorIsWord) {
     const wordData = WORDS[Math.floor(Math.random() * WORDS.length)];
     connectorPath = wordData.path;
-    
+
     // Update target
     document.getElementById('connectorTarget').innerHTML = `${connectorPath.join(' → ')}<br><span class="text-xs text-[rgba(255,255,255,0.4)] italic">${wordData.text} (${wordData.english})</span>`;
   } else {
@@ -255,7 +255,7 @@ function handleConnectorClick(tileEl, char) {
       if (connectorCompletedPaths > parseInt(currentBest)) {
         localStorage.setItem('gujarati_connector_best', connectorCompletedPaths);
       }
-      
+
       showWinOverlay(
         `શાબાશ! Completed ${connectorCompletedPaths} connector path(s) successfully!`,
         `🎉 કક્કો માસ્ટર! Path Tracing Success!`
@@ -293,9 +293,9 @@ let blasterDismantleStage = 0; // 0: Consonant, 1: Vowel sign
 function initBlaster() {
   blasterCanvas = document.getElementById('blasterCanvas');
   blasterCtx = blasterCanvas.getContext('2d');
-  
+
   resizeBlasterCanvas();
-  
+
   blasterScore = 0;
   blasterTimeLeft = 30;
   bubbles = [];
@@ -332,13 +332,13 @@ function resizeBlasterCanvas() {
 
 function nextBlasterTarget() {
   blasterTarget = BARAKHADI_FORMULAS[Math.floor(Math.random() * BARAKHADI_FORMULAS.length)];
-  
+
   // If score >= 5, launch the advanced component popping dismantler
   blasterDismantleActive = blasterScore >= 5;
   blasterDismantleStage = 0;
 
   const targetLabel = document.getElementById('blasterTargetFormula');
-  
+
   if (blasterDismantleActive) {
     targetLabel.innerHTML = `<span class="text-red-400">Dismantle: ${blasterTarget.result}</span><br><span class="text-sm font-medium text-[rgba(235,235,245,0.4)] italic">Pop root base consonant: ${blasterTarget.c} first!</span>`;
   } else {
@@ -358,15 +358,15 @@ function updateBlasterTimerUI() {
 
 function spawnBubble() {
   if (bubbles.length >= 6) return;
-  
+
   const radius = 35 + Math.random() * 10;
   const x = radius + Math.random() * (blasterCanvas.width - radius * 2);
   const y = blasterCanvas.height + radius;
   const speed = 1.0 + Math.random() * 1.5;
-  
+
   const randFormula = BARAKHADI_FORMULAS[Math.floor(Math.random() * BARAKHADI_FORMULAS.length)];
   let value = randFormula.result;
-  
+
   if (blasterDismantleActive) {
     // Spawn components (consonants and vowel signs)
     if (Math.random() < 0.5) {
@@ -421,14 +421,14 @@ function handleBlasterClick(event) {
     const dist = Math.hypot(clickX - bubble.x, clickY - bubble.y);
     if (dist <= bubble.radius) {
       bubbles.splice(idx, 1);
-      
+
       if (blasterDismantleActive) {
         // Dismantling sequence checks
         if (blasterDismantleStage === 0) {
           if (bubble.value === blasterTarget.c) {
             blasterDismantleStage = 1;
             speakText(blasterTarget.c, PHONETIC_MAP[blasterTarget.c]);
-            
+
             // Update prompt to ask for vowel component
             const targetLabel = document.getElementById('blasterTargetFormula');
             targetLabel.innerHTML = `<span class="text-green-400">Popped ${blasterTarget.c}!</span><br><span class="text-sm font-medium text-[rgba(235,235,245,0.4)] italic">Now pop Vowel Sign: ${blasterTarget.v}!</span>`;
@@ -612,7 +612,7 @@ function shuffle(array) {
 function showWinOverlay(statsText, titleText, isNewRecord = false) {
   document.getElementById('winStats').textContent = statsText;
   document.getElementById('newRecordText').textContent = isNewRecord ? `🎉 Amazing! A new cognitive personal record!` : '';
-  
+
   const titleEl = document.querySelector('#winOverlay .win-title');
   if (titleEl && titleText) titleEl.textContent = titleText;
 
@@ -637,16 +637,4 @@ window.onload = () => {
   updateMilestonesUI();
 };
 
-// Strict Zoom Lock: Blocks pinch-to-zoom but allows two-finger scrolling
-document.addEventListener('touchstart', (e) => {
-  if (e.touches.length > 1) {
-    e.preventDefault();
-  }
-}, { passive: false });
-
-document.addEventListener('touchmove', (e) => {
-  // Only prevent default if the user is actively pinching (scaling)
-  if (e.touches.length > 1 && e.scale !== 1) {
-    e.preventDefault();
-  }
-}, { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault());
