@@ -637,7 +637,7 @@ window.onload = () => {
   updateMilestonesUI();
 };
 
-// Strict Zoom Lock: Blocks all multi-touch pinch gestures
+// Strict Zoom Lock: Blocks pinch-to-zoom but allows two-finger scrolling
 document.addEventListener('touchstart', (e) => {
   if (e.touches.length > 1) {
     e.preventDefault();
@@ -645,7 +645,8 @@ document.addEventListener('touchstart', (e) => {
 }, { passive: false });
 
 document.addEventListener('touchmove', (e) => {
-  if (e.touches.length > 1) {
+  // Only prevent default if the user is actively pinching (scaling)
+  if (e.touches.length > 1 && e.scale !== 1) {
     e.preventDefault();
   }
 }, { passive: false });
