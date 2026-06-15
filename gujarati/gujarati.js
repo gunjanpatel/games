@@ -637,11 +637,6 @@ window.onload = () => {
   updateMilestonesUI();
 };
 
-// Block single-finger interactions
-document.addEventListener('touchstart', (e) => {
-  if (e.touches.length === 1) e.preventDefault();
-}, { passive: false });
-
 document.addEventListener('touchmove', (e) => {
   if (e.touches.length === 1) e.preventDefault();
 }, { passive: false });
@@ -653,8 +648,3 @@ document.addEventListener('touchend', (e) => {
   if (now - lastTap < 300) e.preventDefault();
   lastTap = now;
 }, { passive: false });
-
-// iOS pinch safeguard
-document.addEventListener('gesturestart', (e) => {
-  e.preventDefault();
-});
