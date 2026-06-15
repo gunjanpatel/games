@@ -638,7 +638,12 @@ window.onload = () => {
 };
 
 document.addEventListener('touchmove', (e) => {
-  if (e.touches.length === 1) e.preventDefault();
+  if (e.touches.length === 1 && e.target.closest('#connectorGrid, #blasterCanvas, #cipherGrid')) {
+    e.preventDefault();
+  }
+  if (e.scale !== undefined && e.scale !== 1) {
+    e.preventDefault();
+  }
 }, { passive: false });
 
 // Disable double-tap zoom
